@@ -52,3 +52,8 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// Enable stdin for interactive CLI
+tasks.named<JavaExec>("bootRun") {
+    standardInput = System.`in`
+}
