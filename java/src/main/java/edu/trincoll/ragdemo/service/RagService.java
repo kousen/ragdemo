@@ -1,7 +1,12 @@
 package edu.trincoll.ragdemo.service;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Service for RAG-based question answering.
@@ -11,6 +16,17 @@ import org.springframework.stereotype.Service;
  * - Retrieve: Searches vector store for relevant chunks
  * - Augment: Adds retrieved context to the prompt
  * - Generate: Sends augmented prompt to LLM
+ * <p>
+ * The advisor uses a default prompt template similar to:
+ * <pre>
+ * Context information is below.
+ * ---------------------
+ * {question_answer_context}
+ * ---------------------
+ * Given the context information and no prior knowledge, answer the query.
+ * Query: {query}
+ * Answer:
+ * </pre>
  */
 @Service
 public class RagService {
@@ -39,5 +55,35 @@ public class RagService {
                 .user(question)
                 .call()
                 .content();
+    }
+
+    /**
+     * Ask a question and get the full response including metadata.
+     * Use this to inspect which documents were retrieved for the answer.
+     *
+     * @param question the user's question
+     * @return the full ChatResponse with metadata
+     */
+    public ChatResponse askWithContext(String question) {
+        return chatClient.prompt()
+                .user(question)
+                .call()
+                .chatResponse();
+    }
+
+    /**
+     * Get the documents that were retrieved for the last question.
+     * Useful for debugging and understanding RAG behavior.
+     *
+     * @param response the ChatResponse from askWithContext
+     * @return list of retrieved documents, or empty list if none found
+     */
+    @SuppressWarnings("unchecked")
+    public List<Document> getRetrievedDocuments(ChatResponse response) {
+        Object docs = response.getMetadata().get(QuestionAnswerAdvisor.RETRIEVED_DOCUMENTS);
+        if (docs instanceof List<?>) {
+            return (List<Document>) docs;
+        }
+        return List.of();
     }
 }
