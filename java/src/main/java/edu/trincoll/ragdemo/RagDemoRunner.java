@@ -40,13 +40,15 @@ public class RagDemoRunner implements CommandLineRunner {
         System.out.printf("Loaded documents into %d chunks%n%n", chunks);
 
         // Interactive Q&A loop
-        System.out.println("Ask questions about the document (type 'quit' to exit):");
-        System.out.println("Tip: Prefix with 'debug:' to see which documents were retrieved");
-        System.out.println("\nSample questions:");
-        System.out.println("  - What is the Transformer architecture?");
-        System.out.println("  - How does self-attention work?");
-        System.out.println("  - What are the key contributions of this paper?\n");
-
+        System.out.println("""
+                Ask questions about the document (type 'quit' to exit):
+                Tip: Prefix with 'debug:' to see which documents were retrieved
+                
+                Sample questions:
+                  - What is the Transformer architecture?
+                  - How does self-attention work?
+                  - What are the key contributions of this paper?
+                """);
         try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
                 System.out.print("\nYou: ");
