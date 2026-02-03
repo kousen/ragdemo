@@ -9,7 +9,7 @@ Both demos follow the same flow: **Load PDF → Chunk → Embed → Store → Re
 | | Java | Python |
 |---|---|---|
 | **Framework** | Spring AI 1.0.3 | LangChain |
-| **LLM** | OpenAI (gpt-4o-mini) | OpenAI (gpt-4o-mini) |
+| **LLM** | OpenAI (gpt-5-mini) | OpenAI (gpt-5-mini) |
 | **Embeddings** | text-embedding-3-small | text-embedding-3-small |
 | **Vector Store** | SimpleVectorStore (in-memory) | InMemoryVectorStore |
 | **PDF Parser** | PagePdfDocumentReader | PyPDFLoader |

@@ -38,7 +38,12 @@ def load_and_chunk_pdf(
 
     # Step 2: Chunk - split into smaller pieces for better retrieval
     # RecursiveCharacterTextSplitter tries to split on natural boundaries
-    # (paragraphs, sentences, words) before falling back to characters
+    # (paragraphs, sentences, words) before falling back to characters.
+    # This preserves semantic context better than fixed-size splits.
+    #
+    # Alternative: TokenTextSplitter (used in Java version) splits by token count,
+    # which is useful for staying within LLM context limits but may split
+    # mid-sentence.
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,

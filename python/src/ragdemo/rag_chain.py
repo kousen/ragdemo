@@ -99,6 +99,7 @@ def create_rag_chain_with_sources(
     Create a RAG chain that returns both the answer and retrieved documents.
 
     Useful for debugging and understanding which documents contributed to the answer.
+    Documents include similarity scores in their metadata when available.
 
     Args:
         vector_store: The vector store to retrieve from
@@ -108,21 +109,24 @@ def create_rag_chain_with_sources(
     Returns:
         LCEL chain that returns {"answer": str, "source_documents": list[Document]}
     """
-    retriever = vector_store.as_retriever(search_kwargs={"k": k})
     prompt = ChatPromptTemplate.from_template(RAG_TEMPLATE)
     llm = ChatOpenAI(model=model, temperature=1)
 
-    def format_docs_with_passthrough(docs: list[Document]) -> dict:
-        """Format docs for prompt while preserving originals for output."""
-        return {
-            "context": format_docs(docs),
-            "source_documents": docs,
-        }
+    def retrieve_with_scores(question: str) -> list[Document]:
+        """Retrieve documents with similarity scores attached to metadata."""
+        # Use similarity_search_with_score to get (doc, score) tuples
+        results = vector_store.similarity_search_with_score(question, k=k)
+        docs_with_scores = []
+        for doc, score in results:
+            # Add score to metadata for display
+            doc.metadata["score"] = score
+            docs_with_scores.append(doc)
+        return docs_with_scores
 
-    # Chain that captures both the formatted context and original documents
+    # Chain that captures both the formatted context and original documents with scores
     rag_chain_with_sources = (
         {
-            "docs": retriever,
+            "docs": lambda x: retrieve_with_scores(x),
             "question": RunnablePassthrough(),
         }
         | {
@@ -149,16 +153,20 @@ def print_source_documents(docs: list[Document], max_chars: int = 200) -> None:
     Print retrieved source documents for debugging.
 
     Args:
-        docs: List of retrieved Document objects
+        docs: List of retrieved Document objects (may include similarity scores in metadata)
         max_chars: Maximum characters to show from each document
     """
     print(f"\n--- Retrieved {len(docs)} documents ---")
     for i, doc in enumerate(docs, 1):
         source = doc.metadata.get("source", "unknown")
         page = doc.metadata.get("page", "?")
+        score = doc.metadata.get("score")
         content_preview = doc.page_content[:max_chars].replace("\n", " ")
         if len(doc.page_content) > max_chars:
             content_preview += "..."
-        print(f"\n[{i}] Source: {source}, Page: {page}")
+
+        # Show similarity score if available
+        score_str = f", Score: {score:.3f}" if score is not None else ""
+        print(f"\n[{i}] Source: {source}, Page: {page}{score_str}")
         print(f"    {content_preview}")
     print("-----------------------------------\n")

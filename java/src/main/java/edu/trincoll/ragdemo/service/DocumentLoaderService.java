@@ -34,7 +34,12 @@ public class DocumentLoaderService {
 
     public DocumentLoaderService(VectorStore vectorStore) {
         this.vectorStore = vectorStore;
-        // Default settings: ~800 tokens per chunk with 400 token overlap
+        // TokenTextSplitter splits by token count (~800 tokens per chunk, 400 overlap).
+        // This is useful for staying within LLM context limits.
+        //
+        // Alternative: RecursiveCharacterTextSplitter (used in Python version) splits on
+        // semantic boundaries (paragraphs, sentences) which may preserve context better
+        // but produces variable chunk sizes.
         this.textSplitter = new TokenTextSplitter();
     }
 

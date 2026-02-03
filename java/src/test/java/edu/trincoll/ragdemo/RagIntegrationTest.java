@@ -6,9 +6,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,5 +78,30 @@ class RagIntegrationTest {
 
         // Then - should still return a response, likely saying it doesn't know
         assertThat(answer).isNotBlank();
+    }
+
+    @Test
+    void shouldRetrieveRelevantDocuments() {
+        // When - using askWithContext to get metadata
+        ChatResponse response = ragService.askWithContext("What is multi-head attention?");
+        List<Document> docs = ragService.getRetrievedDocuments(response);
+
+        // Then - should have retrieved relevant documents
+        assertThat(docs).isNotEmpty();
+        // At least one document should mention attention
+        assertThat(docs.stream()
+                .anyMatch(doc -> doc.getText().toLowerCase().contains("attention")))
+                .isTrue();
+    }
+
+    @Test
+    void retrievedDocumentsShouldHaveSourceMetadata() {
+        // When
+        ChatResponse response = ragService.askWithContext("Explain the encoder architecture");
+        List<Document> docs = ragService.getRetrievedDocuments(response);
+
+        // Then - documents should have source metadata for traceability
+        assertThat(docs).isNotEmpty();
+        assertThat(docs.get(0).getMetadata()).containsKey("source");
     }
 }
