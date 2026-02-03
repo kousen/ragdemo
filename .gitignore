@@ -1,0 +1,21 @@
+# Environment files (contain API keys)
+.env
+.env.local
+.env.*.local
+
+# Claude Code
+.claude/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
