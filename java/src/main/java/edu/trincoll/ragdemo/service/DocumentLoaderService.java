@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,9 @@ import java.util.List;
  * - PagePdfDocumentReader: Extracts text from PDF (one Document per page)
  * - TokenTextSplitter: Splits documents into smaller chunks for better retrieval
  * - VectorStore: Embeds chunks and stores them for similarity search
+ * <p>
+ * Includes duplicate detection to avoid re-loading documents that already exist
+ * in the vector store (important when sharing the store between applications).
  */
 @Service
 public class DocumentLoaderService {
@@ -45,6 +50,7 @@ public class DocumentLoaderService {
 
     /**
      * Load all PDF documents from the documents directory into the vector store.
+     * Skips documents that already exist (based on source filename).
      *
      * @return total number of chunks created and stored
      */
@@ -61,14 +67,43 @@ public class DocumentLoaderService {
     }
 
     /**
+     * Check if a document with the given source already exists in the vector store.
+     *
+     * @param source the source filename to check
+     * @return true if documents from this source already exist
+     */
+    public boolean documentExists(String source) {
+        var filter = new FilterExpressionBuilder()
+                .eq("source", source)
+                .build();
+
+        var searchRequest = SearchRequest.builder()
+                .query("test")  // Minimal query just to check existence
+                .topK(1)
+                .filterExpression(filter)
+                .build();
+
+        List<Document> existing = vectorStore.similaritySearch(searchRequest);
+        return !existing.isEmpty();
+    }
+
+    /**
      * Load a PDF document into the vector store.
      * Adds source metadata to each chunk for traceability.
+     * Skips loading if the document already exists in the store.
      *
      * @param pdfResource the PDF file to load
-     * @return number of chunks created and stored
+     * @return number of chunks created and stored (0 if skipped)
      */
     public int loadPdf(Resource pdfResource) {
         String filename = pdfResource.getFilename();
+
+        // Check for duplicates before loading
+        if (documentExists(filename)) {
+            log.info("Document {} already exists in vector store, skipping", filename);
+            return 0;
+        }
+
         log.info("Loading PDF: {}", filename);
 
         // Step 1: Load PDF - extracts text page by page

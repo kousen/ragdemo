@@ -3,8 +3,6 @@ package edu.trincoll.ragdemo.config;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +22,10 @@ import org.springframework.core.io.Resource;
  *   <li>{@code {question_answer_context}} - Retrieved document chunks</li>
  *   <li>{@code {query}} - The user's question</li>
  * </ul>
+ * <p>
+ * The VectorStore bean is auto-configured by Spring AI's PgVector starter.
+ * It connects to Supabase (or any PostgreSQL with pgvector extension) using
+ * properties in application.properties.
  */
 @Configuration
 public class RagConfig {
@@ -31,14 +33,8 @@ public class RagConfig {
     @Value("classpath:prompts/rag-prompt.st")
     private Resource ragPromptResource;
 
-    /**
-     * SimpleVectorStore is an in-memory vector store suitable for demos.
-     * For production, consider PgVectorStore, ChromaVectorStore, or RedisVectorStore.
-     */
-    @Bean
-    public VectorStore vectorStore(EmbeddingModel embeddingModel) {
-        return SimpleVectorStore.builder(embeddingModel).build();
-    }
+    // VectorStore is auto-configured by spring-ai-pgvector-store-spring-boot-starter
+    // No explicit bean needed - Spring Boot creates PgVectorStore from application.properties
 
     /**
      * ChatClient configured with QuestionAnswerAdvisor for RAG.

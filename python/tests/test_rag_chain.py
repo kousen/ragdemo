@@ -2,6 +2,7 @@
 
 from unittest.mock import patch
 from langchain_core.documents import Document
+from langchain_core.vectorstores import InMemoryVectorStore
 
 
 class TestRagChain:
@@ -33,14 +34,12 @@ class TestRagChain:
     def test_create_rag_chain_returns_runnable(self, mock_embeddings, mock_llm):
         """Test that create_rag_chain returns a runnable chain."""
         from ragdemo.rag_chain import create_rag_chain
-        from ragdemo.vector_store import create_vector_store
 
+        # Use InMemoryVectorStore for unit tests (avoids database dependency)
         chunks = [
             Document(page_content="The Transformer uses attention."),
         ]
-
-        with patch('ragdemo.vector_store.OpenAIEmbeddings', return_value=mock_embeddings):
-            vector_store = create_vector_store(chunks)
+        vector_store = InMemoryVectorStore.from_documents(chunks, mock_embeddings)
 
         with patch('ragdemo.rag_chain.ChatOpenAI', return_value=mock_llm):
             chain = create_rag_chain(vector_store)
@@ -58,14 +57,12 @@ class TestRagChain:
     def test_create_rag_chain_with_custom_k(self, mock_embeddings, mock_llm):
         """Test creating RAG chain with custom retrieval count."""
         from ragdemo.rag_chain import create_rag_chain
-        from ragdemo.vector_store import create_vector_store
 
+        # Use InMemoryVectorStore for unit tests (avoids database dependency)
         chunks = [
             Document(page_content=f"Document {i}") for i in range(10)
         ]
-
-        with patch('ragdemo.vector_store.OpenAIEmbeddings', return_value=mock_embeddings):
-            vector_store = create_vector_store(chunks)
+        vector_store = InMemoryVectorStore.from_documents(chunks, mock_embeddings)
 
         with patch('ragdemo.rag_chain.ChatOpenAI', return_value=mock_llm):
             chain = create_rag_chain(vector_store, k=2)

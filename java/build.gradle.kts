@@ -35,14 +35,18 @@ dependencies {
     // Spring AI - OpenAI integration
     implementation("org.springframework.ai:spring-ai-starter-model-openai")
 
-    // Spring AI - RAG advisors (includes QuestionAnswerAdvisor and SimpleVectorStore)
+    // Spring AI - RAG advisors (includes QuestionAnswerAdvisor)
     implementation("org.springframework.ai:spring-ai-advisors-vector-store")
+
+    // Spring AI - PgVector store (Supabase-compatible)
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
 
     // Spring AI - PDF document reader
     implementation("org.springframework.ai:spring-ai-pdf-document-reader")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.testcontainers:postgresql:1.20.4")
 }
 
 tasks.withType<Test> {

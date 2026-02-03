@@ -17,13 +17,18 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests that require a valid OPENAI_API_KEY.
- * These tests verify the full RAG pipeline works end-to-end.
+ * Integration tests that require a valid OPENAI_API_KEY and Supabase credentials.
+ * These tests verify the full RAG pipeline works end-to-end with PgVector.
+ *
+ * Required environment variables:
+ * - OPENAI_API_KEY
+ * - SUPABASE_HOST, SUPABASE_USER, SUPABASE_PASSWORD
  */
 @SpringBootTest
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".+")
+@EnabledIfEnvironmentVariable(named = "SUPABASE_PASSWORD", matches = ".+")
 class RagIntegrationTest {
 
     @Autowired

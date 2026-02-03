@@ -19,10 +19,16 @@ def main():
     # Load environment variables from .env file
     load_dotenv()
 
-    # Verify API key is set
+    # Verify required environment variables
     if not os.getenv("OPENAI_API_KEY"):
         print("Error: OPENAI_API_KEY environment variable not set")
         print("Set it via: export OPENAI_API_KEY=sk-...")
+        return
+
+    if not os.getenv("SUPABASE_PASSWORD"):
+        print("Error: Supabase credentials not set")
+        print("Required: SUPABASE_HOST, SUPABASE_USER, SUPABASE_PASSWORD")
+        print("See README.md for setup instructions")
         return
 
     print("\n=== RAG Demo (Python/LangChain) ===\n")
@@ -35,7 +41,7 @@ def main():
         print(f"Error: Documents directory not found at {docs_dir}")
         return
 
-    # RAG Flow: Load → Chunk → Embed → Store
+    # RAG Flow: Load → Chunk → Embed → Store (with duplicate detection)
     print("Loading and processing PDFs...")
     chunks = load_all_pdfs(docs_dir)
 
@@ -43,6 +49,9 @@ def main():
         print("No documents loaded. Add PDF files to the documents/ directory.")
         return
 
+    # Connect to Supabase PGVector store and add new documents
+    # Duplicate detection ensures we don't re-add existing documents
+    print("Connecting to Supabase vector store...")
     vector_store = create_vector_store(chunks)
 
     # Create RAG chains - one simple, one with source tracking
