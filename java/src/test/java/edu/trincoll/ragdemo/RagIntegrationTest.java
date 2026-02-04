@@ -104,4 +104,24 @@ class RagIntegrationTest {
         assertThat(docs).isNotEmpty();
         assertThat(docs.get(0).getMetadata()).containsKey("source");
     }
+
+    @Test
+    void retrievedDocumentsShouldHaveSimilarityScores() {
+        // When
+        ChatResponse response = ragService.askWithContext("What is multi-head attention?");
+        List<Document> docs = ragService.getRetrievedDocuments(response);
+
+        // Then - documents should have similarity scores for debugging
+        assertThat(docs).isNotEmpty();
+        Document firstDoc = docs.get(0);
+
+        // Spring AI uses "distance" for similarity (lower = more similar)
+        boolean hasScore = firstDoc.getMetadata().containsKey("score")
+                || firstDoc.getMetadata().containsKey("distance");
+
+        assertThat(hasScore)
+                .as("Retrieved documents should include similarity score in metadata. " +
+                    "Available keys: %s", firstDoc.getMetadata().keySet())
+                .isTrue();
+    }
 }

@@ -102,14 +102,17 @@ public class RagDemoRunner implements CommandLineRunner {
             Document doc = docs.get(i);
             String source = (String) doc.getMetadata().getOrDefault("source", "unknown");
 
-            // Check for similarity score in metadata (Spring AI may use "score" or "distance")
+            // Check for similarity in metadata
+            // Spring AI's SimpleVectorStore uses "distance" (lower = more similar)
             String scoreStr = "";
-            Object score = doc.getMetadata().get("score");
-            if (score == null) {
-                score = doc.getMetadata().get("distance");
-            }
-            if (score instanceof Number) {
-                scoreStr = String.format(", Score: %.3f", ((Number) score).doubleValue());
+            Object distance = doc.getMetadata().get("distance");
+            if (distance instanceof Number) {
+                scoreStr = String.format(", Distance: %.3f", ((Number) distance).doubleValue());
+            } else {
+                Object score = doc.getMetadata().get("score");
+                if (score instanceof Number) {
+                    scoreStr = String.format(", Score: %.3f", ((Number) score).doubleValue());
+                }
             }
 
             String content = doc.getText();
