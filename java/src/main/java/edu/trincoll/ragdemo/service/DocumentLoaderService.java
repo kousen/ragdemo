@@ -34,12 +34,12 @@ public class DocumentLoaderService {
 
     public DocumentLoaderService(VectorStore vectorStore) {
         this.vectorStore = vectorStore;
-        // TokenTextSplitter splits by token count (~800 tokens per chunk, 400 overlap).
-        // This is useful for staying within LLM context limits.
+        // TokenTextSplitter splits by token count (~800 tokens per chunk).
+        // NOTE: Unlike LangChain, Spring AI's TokenTextSplitter has NO overlap between chunks.
+        // This may cause context loss at chunk boundaries.
         //
-        // Alternative: RecursiveCharacterTextSplitter (used in Python version) splits on
-        // semantic boundaries (paragraphs, sentences) which may preserve context better
-        // but produces variable chunk sizes.
+        // Alternative: Python's RecursiveCharacterTextSplitter splits on semantic boundaries
+        // (paragraphs, sentences) and supports overlap for better context preservation.
         this.textSplitter = new TokenTextSplitter();
     }
 
