@@ -86,7 +86,7 @@ RAG was developed when context windows were tiny—4K or 8K tokens.
 
 You literally couldn't fit a single long document in the prompt.
 
-Today? Claude has 200K tokens. Gemini's latest models hit 1 million.
+Today? Claude has 200K tokens. Gemini 3 Pro has 2 million.
 
 So you might ask: do we still need RAG?
 

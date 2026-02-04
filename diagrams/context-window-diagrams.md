@@ -62,6 +62,8 @@ timeline
     2024 : GPT-4 Turbo : 128K tokens
          : Claude 3 : 200K tokens
     2025 : Gemini 2.5 Pro : 1M tokens
+         : Gemini 3 Flash : 1M tokens
+         : Gemini 3 Pro : 2M tokens
 ```
 
 Alternative bar-style visualization:
@@ -70,8 +72,8 @@ Alternative bar-style visualization:
 xychart-beta
     title "Context Window Growth (tokens)"
     x-axis [2022, 2023, 2024, 2025]
-    y-axis "Tokens (thousands)" 0 --> 1000
-    bar [4, 100, 200, 1000]
+    y-axis "Tokens (thousands)" 0 --> 2000
+    bar [4, 100, 200, 2000]
 ```
 
 ---
