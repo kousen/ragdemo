@@ -2,8 +2,6 @@
 
 These Mermaid diagrams illustrate the context window constraint that RAG solves.
 
-**Note:** Colors optimized for dark themes.
-
 ---
 
 ## 1. The Problem: Documents Don't Fit
@@ -33,7 +31,6 @@ block-beta
 Alternative simpler version:
 
 ```mermaid
-%%{init: {'theme': 'dark'}}%%
 flowchart LR
     subgraph docs["Your Documents"]
         D1["Doc 1: 50K tokens"]
@@ -45,9 +42,9 @@ flowchart LR
 
     X -->|"❌ OVERFLOW"| fail["Can't process"]
 
-    style docs fill:#1e3a5f,stroke:#5dadec,color:#fff
-    style X fill:#e63946,stroke:#ff6b6b,color:#fff
-    style fail fill:#9d0208,stroke:#ff6b6b,color:#fff
+    style docs fill:#e3f2fd,stroke:#1976d2,color:#000
+    style X fill:#ffcdd2,stroke:#c62828,color:#000
+    style fail fill:#ef5350,stroke:#c62828,color:#fff
 ```
 
 ---
@@ -57,7 +54,6 @@ flowchart LR
 Shows how context windows have grown over time.
 
 ```mermaid
-%%{init: {'theme': 'dark'}}%%
 timeline
     title Context Window Sizes Over Time
     2022 : GPT-3 : 4K tokens
@@ -71,7 +67,6 @@ timeline
 Alternative bar-style visualization:
 
 ```mermaid
-%%{init: {'theme': 'dark'}}%%
 xychart-beta
     title "Context Window Growth (tokens)"
     x-axis [2022, 2023, 2024, 2025]
@@ -86,7 +81,6 @@ xychart-beta
 Shows how RAG retrieves only relevant chunks that fit.
 
 ```mermaid
-%%{init: {'theme': 'dark'}}%%
 flowchart TB
     subgraph docs["Document Store (any size)"]
         D1["Chunk 1"]
@@ -117,16 +111,16 @@ flowchart TB
     Q --> window
     window --> LLM["LLM"] --> A["Answer"]
 
-    style docs fill:#1e3a5f,stroke:#5dadec,color:#fff
-    style D2 fill:#2ecc71,stroke:#58d68d,color:#000
-    style D4 fill:#2ecc71,stroke:#58d68d,color:#000
-    style R fill:#1a5f2a,stroke:#2ecc71,color:#fff
-    style window fill:#0d7a3e,stroke:#58d68d,color:#fff
-    style Q fill:#9b59b6,stroke:#bb8fce,color:#fff
-    style E fill:#8e44ad,stroke:#bb8fce,color:#fff
-    style S fill:#8e44ad,stroke:#bb8fce,color:#fff
-    style LLM fill:#e67e22,stroke:#f5b041,color:#fff
-    style A fill:#27ae60,stroke:#58d68d,color:#fff
+    style docs fill:#e3f2fd,stroke:#1976d2,color:#000
+    style D2 fill:#c8e6c9,stroke:#388e3c,color:#000
+    style D4 fill:#c8e6c9,stroke:#388e3c,color:#000
+    style R fill:#a5d6a7,stroke:#388e3c,color:#000
+    style window fill:#81c784,stroke:#2e7d32,color:#000
+    style Q fill:#e1bee7,stroke:#7b1fa2,color:#000
+    style E fill:#ce93d8,stroke:#7b1fa2,color:#000
+    style S fill:#ce93d8,stroke:#7b1fa2,color:#000
+    style LLM fill:#ffcc80,stroke:#ef6c00,color:#000
+    style A fill:#a5d6a7,stroke:#388e3c,color:#000
 ```
 
 ---
