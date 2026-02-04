@@ -107,45 +107,42 @@ def create_rag_chain_with_sources(
         k: Number of documents to retrieve
 
     Returns:
-        LCEL chain that returns {"answer": str, "source_documents": list[Document]}
+        Callable that returns {"answer": str, "source_documents": list[Document]}
     """
     prompt = ChatPromptTemplate.from_template(RAG_TEMPLATE)
     llm = ChatOpenAI(model=model, temperature=1)
 
     def retrieve_with_scores(question: str) -> list[Document]:
         """Retrieve documents with similarity scores attached to metadata."""
-        # Use similarity_search_with_score to get (doc, score) tuples
-        results = vector_store.similarity_search_with_score(question, k=k)
-        docs_with_scores = []
-        for doc, score in results:
-            # Add score to metadata for display
-            doc.metadata["score"] = score
-            docs_with_scores.append(doc)
-        return docs_with_scores
+        try:
+            # Use similarity_search_with_score to get (doc, score) tuples
+            results = vector_store.similarity_search_with_score(question, k=k)
+            docs_with_scores = []
+            for doc, score in results:
+                doc.metadata["score"] = score
+                docs_with_scores.append(doc)
+            return docs_with_scores
+        except Exception:
+            # Fallback if similarity_search_with_score not available
+            return vector_store.similarity_search(question, k=k)
 
-    # Chain that captures both the formatted context and original documents with scores
-    rag_chain_with_sources = (
-        {
-            "docs": lambda x: retrieve_with_scores(x),
-            "question": RunnablePassthrough(),
-        }
-        | {
-            "context": lambda x: format_docs(x["docs"]),
-            "source_documents": lambda x: x["docs"],
-            "question": lambda x: x["question"],
-        }
-        | {
-            "answer": (
-                {"context": lambda x: x["context"], "question": lambda x: x["question"]}
-                | prompt
-                | llm
-                | StrOutputParser()
-            ),
-            "source_documents": lambda x: x["source_documents"],
-        }
-    )
+    def invoke(question: str) -> dict:
+        """Run the RAG chain and return answer with sources."""
+        docs = retrieve_with_scores(question)
+        context = format_docs(docs)
 
-    return rag_chain_with_sources
+        # Build the prompt and get answer
+        chain = prompt | llm | StrOutputParser()
+        answer = chain.invoke({"context": context, "question": question})
+
+        return {"answer": answer, "source_documents": docs}
+
+    # Return a simple callable wrapper with invoke method
+    class ChainWrapper:
+        def invoke(self, question: str) -> dict:
+            return invoke(question)
+
+    return ChainWrapper()
 
 
 def print_source_documents(docs: list[Document], max_chars: int = 200) -> None:
