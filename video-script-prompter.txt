@@ -1,0 +1,296 @@
+===== HOOK =====
+
+Large language models are trained on public data—they don't know about YOUR documents.
+
+Your company's internal wiki, your research papers, your private data.
+
+So how do you get an LLM to answer questions about content it's never seen?
+
+That's where RAG comes in.
+
+
+===== WHAT IS RAG? =====
+
+RAG stands for Retrieval-Augmented Generation.
+
+Instead of training or fine-tuning a model on your data—which is expensive and slow—you retrieve relevant pieces of your documents at query time and include them in the prompt.
+
+[SHOW: Diagram 1 - Documents Don't Fit]
+
+Here's the problem RAG solves.
+
+LLMs have a context window—a limit on how much text they can see at once.
+
+You can't just paste your entire document library into the prompt. It won't fit.
+
+[SHOW: LangChain4j indexing diagram]
+https://docs.langchain4j.dev/tutorials/rag
+
+So here's how RAG works:
+
+One. Load your documents—PDFs, web pages, whatever.
+
+Two. Chunk them into smaller pieces, because we can't fit entire documents in a prompt.
+
+Three. Embed each chunk—convert it to a vector that captures its meaning.
+
+Four. Store those vectors in a database optimized for similarity search.
+
+[SHOW: LangChain4j retrieval diagram]
+
+Five. When a user asks a question, Retrieve the most relevant chunks.
+
+Six. Generate an answer by sending the question plus those chunks to the LLM.
+
+The LLM sees your data in the prompt context, not in its training.
+
+That's the key insight.
+
+
+===== WHAT ARE EMBEDDINGS? =====
+
+[SHOW: Diagram 4a - Embedding Space Clustering]
+
+Let me explain what "embedding" means.
+
+When we embed text, we convert it to a vector—a list of numbers that captures its meaning.
+
+Here's the magic: words with similar meanings end up as similar vectors.
+
+Apple and banana are close together—they're both fruits.
+
+Chicago and Detroit are close—they're both Midwest cities.
+
+Dog and cat are close—they're both animals.
+
+[SHOW: Diagram 4b - Query Vector Finding Matches]
+
+Now watch what happens when someone asks a question.
+
+The question gets embedded too—it becomes a vector.
+
+A question about fruits lands near the fruit cluster.
+
+RAG finds the nearest chunks and retrieves them.
+
+That's how the system knows which pieces of your documents are relevant to the question.
+
+
+===== WHY DOES RAG EXIST? =====
+
+[SHOW: Diagram 2 - Context Window Timeline]
+
+Here's important context.
+
+RAG was developed when context windows were tiny—4K or 8K tokens.
+
+You literally couldn't fit a single long document in the prompt.
+
+Today? Claude has 200K tokens. Gemini's latest models hit 1 million.
+
+So you might ask: do we still need RAG?
+
+The answer—for now—is yes.
+
+If you've used tools like Claude Code, you know we still hit context limits on real codebases.
+
+And even with huge windows, retrieval is often faster and cheaper than stuffing everything into the prompt.
+
+But this is worth watching. The constraint that created RAG is shrinking.
+
+The technique may evolve—or become unnecessary for some use cases.
+
+
+===== THE DEMO PROJECT =====
+
+I've built the same RAG application twice—once in Python using LangChain, and once in Java using Spring AI.
+
+Same document, same embedding model, same LLM.
+
+Let's see them in action.
+
+The document I'm using is the famous "Attention Is All You Need" paper that introduced the Transformer architecture.
+
+
+===== PYTHON DEMO =====
+
+[SHOW: LangChain Python docs - note they have similar diagrams]
+https://docs.langchain.com/oss/python/langchain/rag
+
+[DEMO: Run python -m ragdemo.main]
+
+[DEMO: Ask "What is the Transformer architecture?"]
+
+[DEMO: Ask with debug: "debug: How does self-attention work?"]
+
+Watch what happens when I prefix with "debug".
+
+Now I can see exactly which chunks the system retrieved.
+
+These four pieces of the paper were deemed most relevant to my question.
+
+Remember the embedding diagram? The question "How does self-attention work?" embedded closest to these specific chunks.
+
+The answer is synthesized from THIS context, not from the model's training data.
+
+That's RAG in action.
+
+
+===== JAVA DEMO =====
+
+[SHOW: Spring AI unified diagram]
+https://docs.spring.io/spring-ai/reference/concepts.html#concept-rag
+
+[DEMO: Run ./gradlew bootRun]
+
+Here's the same thing in Java with Spring AI.
+
+Same document, same results.
+
+Notice that Spring AI visualizes RAG as a single unified flow, while LangChain splits it into indexing and retrieval phases.
+
+Different visualizations, same underlying concept.
+
+Why show both implementations?
+
+Because in enterprise environments, you'll see RAG implemented in many languages.
+
+The framework changes, but the flow—load, chunk, embed, store, retrieve, generate—stays the same.
+
+
+===== CODE WALKTHROUGH =====
+
+[SHOW: document_loader.py vs DocumentLoaderService.java]
+
+Both versions load PDFs and split them into chunks.
+
+Python uses LangChain's RecursiveCharacterTextSplitter—it tries to break on paragraph boundaries.
+
+Java uses TokenTextSplitter—it counts tokens.
+
+Different strategies, same goal: chunks small enough to fit in a prompt, large enough to contain useful context.
+
+[SHOW: vector_store.py vs RagConfig.java]
+
+The vector store is where embeddings live.
+
+Both use in-memory stores for simplicity.
+
+In production, you'd use something like PostgreSQL with pgvector, Pinecone, or Chroma.
+
+[SHOW: Diagram 3 - RAG Retrieval Flow]
+
+[SHOW: rag_chain.py vs RagService.java]
+
+Here's where retrieval meets generation.
+
+Python uses LangChain's expression language to chain components.
+
+Java uses Spring AI's ChatClient with a QuestionAnswerAdvisor that automatically handles retrieval.
+
+Different APIs, same pattern.
+
+
+===== CUSTOMIZING THE PROMPT =====
+
+[SHOW: prompts/rag-prompt.st]
+
+One thing students often overlook: the prompt template matters.
+
+Here's what we send to the LLM.
+
+We're saying: answer based ONLY on this context. If it's not there, say so.
+
+This prevents hallucination—the model won't make things up because we've constrained it.
+
+You can customize this.
+
+Want bullet points? Change the prompt.
+
+Want the model to cite its sources? Change the prompt.
+
+RAG gives you control over the output.
+
+
+===== BONUS: PERSISTENT STORAGE =====
+
+[SHOW: Supabase dashboard]
+
+The main branch uses in-memory storage—fine for demos, but your vectors disappear when the app stops.
+
+On a separate branch, I've added Supabase—PostgreSQL with the pgvector extension.
+
+Here's something interesting I discovered: even though both apps connect to the same database, they create different tables.
+
+[SHOW: Schema diagram]
+
+Spring AI creates one table structure, LangChain creates another.
+
+Same database doesn't mean automatic interoperability.
+
+If you want both implementations to share vectors, you need to align on schema—or use the same framework.
+
+This is a real-world gotcha worth knowing about.
+
+
+===== WHEN TO USE RAG =====
+
+Quick decision guide.
+
+Use RAG when your data changes frequently—no retraining needed.
+
+Use RAG when you need to cite sources—you know exactly what the model saw.
+
+Use RAG when data is private—it never leaves your infrastructure.
+
+What about fine-tuning?
+
+Fine-tuning is expensive. You need hundreds or thousands of high-quality examples to do it well.
+
+And here's the tricky part: when you change the model's weights, it's not clear how that affects other responses.
+
+You might improve answers in one area and degrade them somewhere else.
+
+The model's weights are a black box. You can't inspect them.
+
+RAG is transparent—you can see exactly what context the model received.
+
+If an answer is wrong, you can check which chunks were retrieved and debug from there.
+
+Consider fine-tuning only when you need to fundamentally change the model's style or behavior.
+
+For most enterprise use cases, RAG is the right starting point.
+
+
+===== WRAP-UP =====
+
+Let's recap.
+
+RAG lets you give an LLM access to your private data without retraining it.
+
+Load, chunk, embed, store, retrieve, generate.
+
+The question becomes a vector. The nearest chunks become context. The LLM generates an answer.
+
+The code is on GitHub—link in the description.
+
+Clone it, swap in your own PDFs, and you've got a working RAG system.
+
+If you found this useful, subscribe for more AI engineering content.
+
+Questions? Drop them in the comments.
+
+
+===== DIAGRAM REFERENCE =====
+
+Custom diagrams (in diagrams/context-window-diagrams.md):
+- Diagram 1: Documents Don't Fit (Mermaid)
+- Diagram 2: Context Window Timeline (Mermaid)
+- Diagram 3: RAG Retrieval Flow (Mermaid)
+- Diagram 4a: Embedding Space Clustering (ASCII)
+- Diagram 4b: Query Vector Finding Matches (ASCII)
+
+External diagrams:
+- LangChain4j: https://docs.langchain4j.dev/tutorials/rag
+- LangChain Python: https://docs.langchain.com/oss/python/langchain/rag
+- Spring AI: https://docs.spring.io/spring-ai/reference/concepts.html#concept-rag
