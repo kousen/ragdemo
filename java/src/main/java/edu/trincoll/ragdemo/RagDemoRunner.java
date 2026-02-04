@@ -93,6 +93,7 @@ public class RagDemoRunner implements CommandLineRunner {
     /**
      * Print retrieved documents for debugging.
      * Shows which chunks from the vector store were used to answer the question.
+     * Includes similarity scores when available.
      */
     private void printRetrievedDocuments(List<Document> docs) {
         System.out.printf("%n--- Retrieved %d documents ---%n", docs.size());
@@ -100,11 +101,22 @@ public class RagDemoRunner implements CommandLineRunner {
         for (int i = 0; i < docs.size(); i++) {
             Document doc = docs.get(i);
             String source = (String) doc.getMetadata().getOrDefault("source", "unknown");
+
+            // Check for similarity score in metadata (Spring AI may use "score" or "distance")
+            String scoreStr = "";
+            Object score = doc.getMetadata().get("score");
+            if (score == null) {
+                score = doc.getMetadata().get("distance");
+            }
+            if (score instanceof Number) {
+                scoreStr = String.format(", Score: %.3f", ((Number) score).doubleValue());
+            }
+
             String content = doc.getText();
             String preview = content.length() > maxChars
                     ? content.substring(0, maxChars).replace("\n", " ") + "..."
                     : content.replace("\n", " ");
-            System.out.printf("%n[%d] Source: %s%n", i + 1, source);
+            System.out.printf("%n[%d] Source: %s%s%n", i + 1, source, scoreStr);
             System.out.printf("    %s%n", preview);
         }
         System.out.println("-----------------------------------\n");
