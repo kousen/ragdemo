@@ -191,25 +191,25 @@ Java uses Spring AI's ChatClient with a QuestionAnswerAdvisor that automatically
 Different APIs, same pattern.
 
 
-===== CUSTOMIZING THE PROMPT =====
-
-[SHOW: prompts/rag-prompt.st]
+===== THE PROMPT TEMPLATE =====
 
 One thing students often overlook: the prompt template matters.
 
-Here's what we send to the LLM.
+Both frameworks provide sensible defaults.
 
-We're saying: answer based ONLY on this context. If it's not there, say so.
+Spring AI's QuestionAnswerAdvisor includes a prompt that says: answer based ONLY on this context. If the answer isn't there, say so.
+
+LangChain's RAG templates work similarly.
 
 This prevents hallucination—the model won't make things up because we've constrained it.
 
-You can customize this.
+You CAN customize these prompts if you need to.
 
 Want bullet points? Change the prompt.
 
 Want the model to cite its sources? Change the prompt.
 
-RAG gives you control over the output.
+But the defaults work well for most use cases—no need to over-engineer it.
 
 
 ===== BONUS: PERSISTENT STORAGE =====
