@@ -2,6 +2,13 @@
 
 These Mermaid diagrams illustrate the context window constraint that RAG solves.
 
+## Color Legend
+
+- Blue: Inputs, processing, and decision steps
+- Green: Retrieval outputs and grounded answer flow
+- Orange: LLM or large-context heavy path
+- Amber/Red: Risks, misses, overflow, or stale-state warnings
+
 ---
 
 ## 1. The Problem: Documents Don't Fit
@@ -118,16 +125,114 @@ flowchart TB
     style D4 fill:#c8e6c9,stroke:#388e3c,color:#000
     style R fill:#a5d6a7,stroke:#388e3c,color:#000
     style window fill:#81c784,stroke:#2e7d32,color:#000
-    style Q fill:#e1bee7,stroke:#7b1fa2,color:#000
-    style E fill:#ce93d8,stroke:#7b1fa2,color:#000
-    style S fill:#ce93d8,stroke:#7b1fa2,color:#000
+    style Q fill:#bbdefb,stroke:#1565c0,color:#000
+    style E fill:#90caf9,stroke:#1565c0,color:#000
+    style S fill:#90caf9,stroke:#1565c0,color:#000
     style LLM fill:#ffcc80,stroke:#ef6c00,color:#000
     style A fill:#a5d6a7,stroke:#388e3c,color:#000
 ```
 
 ---
 
-## 4. What Are Embeddings?
+## 4. Long Context vs RAG (Tradeoffs)
+
+Shows why larger context windows do not eliminate the need for retrieval.
+
+```mermaid
+flowchart LR
+    Q["User Question"] --> LC["Long Context Path<br/>Send very large prompt"]
+    Q --> RG["RAG Path<br/>Retrieve top-k relevant chunks"]
+
+    LC --> L1["Precision: Mixed<br/>lots of distractors possible"]
+    LC --> L2["Cost: Higher per request"]
+    LC --> L3["Latency: Often higher"]
+    LC --> L4["Traceability: Harder to inspect what mattered"]
+
+    RG --> R1["Precision: Focused context"]
+    RG --> R2["Cost: Lower prompt payload"]
+    RG --> R3["Latency: Usually lower for repeated Q&A"]
+    RG --> R4["Traceability: Retrieved chunks are inspectable"]
+
+    style LC fill:#ffe0b2,stroke:#ef6c00,color:#000
+    style RG fill:#c8e6c9,stroke:#2e7d32,color:#000
+    style L1 fill:#ffecb3,stroke:#f9a825,color:#000
+    style L2 fill:#ffecb3,stroke:#f9a825,color:#000
+    style L3 fill:#ffecb3,stroke:#f9a825,color:#000
+    style L4 fill:#ffecb3,stroke:#f9a825,color:#000
+    style R1 fill:#dcedc8,stroke:#558b2f,color:#000
+    style R2 fill:#dcedc8,stroke:#558b2f,color:#000
+    style R3 fill:#dcedc8,stroke:#558b2f,color:#000
+    style R4 fill:#dcedc8,stroke:#558b2f,color:#000
+```
+
+---
+
+## 5. Caching vs Fresh Retrieval
+
+Shows why caching can help cost but does not fully replace retrieval.
+
+```mermaid
+flowchart TB
+    U["Incoming Question"] --> C{"Cache Hit?"}
+    C -->|Yes| H["Reuse cached context/result<br/>Lower cost, faster response"]
+    C -->|No| M["Cache miss"]
+
+    M --> V{"Prompt/docs changed?"}
+    V -->|Yes| R["Retrieve fresh chunks<br/>from vector store"]
+    V -->|No| R
+
+    R --> A["Answer with current context"]
+    H --> A
+
+    D["Documents updated over time"] -.-> R
+    D -.-> S["Cached entries can become stale"]
+    S -.-> C
+
+    style C fill:#bbdefb,stroke:#1565c0,color:#000
+    style H fill:#c8e6c9,stroke:#2e7d32,color:#000
+    style M fill:#ffcdd2,stroke:#c62828,color:#000
+    style V fill:#bbdefb,stroke:#1565c0,color:#000
+    style R fill:#dcedc8,stroke:#558b2f,color:#000
+    style D fill:#ffe0b2,stroke:#ef6c00,color:#000
+    style S fill:#ffecb3,stroke:#f9a825,color:#000
+```
+
+---
+
+## 6. Persistent RAG Across Three Stacks (Supabase + pgvector)
+
+Shows all three implementations sharing the same persistent vector store.
+
+```mermaid
+flowchart LR
+    subgraph apps["Applications"]
+        SA["Spring AI (Java)"]
+        LC4J["LangChain4j (Java)"]
+        PY["LangChain (Python)"]
+    end
+
+    subgraph db["Supabase PostgreSQL + pgvector"]
+        T["Shared vectors table<br/>same dimensions, metadata, schema"]
+    end
+
+    SA -->|"ingest/query"| T
+    LC4J -->|"ingest/query"| T
+    PY -->|"ingest/query"| T
+
+    T --> RET["Similarity search + top-k retrieval"]
+    RET --> ANS["Grounded answers in every stack"]
+
+    style SA fill:#e3f2fd,stroke:#1976d2,color:#000
+    style LC4J fill:#e3f2fd,stroke:#1976d2,color:#000
+    style PY fill:#e3f2fd,stroke:#1976d2,color:#000
+    style T fill:#c8e6c9,stroke:#2e7d32,color:#000
+    style RET fill:#dcedc8,stroke:#558b2f,color:#000
+    style ANS fill:#a5d6a7,stroke:#2e7d32,color:#000
+```
+
+---
+
+## 7. What Are Embeddings? (Diagram labels kept as 4a/4b for script continuity)
 
 Shows how similar concepts cluster together in vector space.
 
@@ -227,5 +332,8 @@ For the video:
 1. Diagram #1 — "The Problem" (documents don't fit)
 2. Diagram #2 — "Context windows are growing" (timeline)
 3. Diagram #3 — "How RAG solves this" (retrieval flow)
-4. Diagram #4a — "What embeddings are" (clustering)
-5. Diagram #4b — "How retrieval works" (query vector)
+4. Diagram #4 — "Long Context vs RAG" (tradeoffs)
+5. Diagram #5 — "Caching vs Fresh Retrieval"
+6. Diagram #6 — "Shared pgvector architecture"
+7. Diagram #4a — "What embeddings are" (clustering)
+8. Diagram #4b — "How retrieval works" (query vector)

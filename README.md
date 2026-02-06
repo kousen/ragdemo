@@ -50,6 +50,23 @@ export OPENAI_API_KEY=sk-...
 python -m ragdemo.main
 ```
 
+## Production Track (Supabase + pgvector)
+
+This main branch focuses on a minimal, in-memory setup for teaching core RAG ideas quickly.
+
+For a persistence-backed, production-style version across all three implementations (Spring AI, LangChain4j, and Python), use the `supabase-pgvector` branch:
+
+```bash
+git switch supabase-pgvector
+```
+
+That branch README includes full setup and run instructions for Supabase/pgvector.
+
+| Mode | Vector Storage | Setup Effort | Best For |
+|---|---|---|---|
+| Main branch | In-memory stores | Low | Learning the RAG pipeline mechanics |
+| `supabase-pgvector` branch | PostgreSQL + pgvector (Supabase) | Medium | Persistence, realism, and deployment discussions |
+
 ## Project Structure
 
 ```
@@ -85,7 +102,7 @@ ragdemo/
 ┌─────────────────────────────────────────────────────────────────┐
 │                        INDEXING PHASE                           │
 ├─────────────────────────────────────────────────────────────────┤
-│  PDF  ──▶  Load  ──▶  Chunk  ──▶  Embed  ──▶  Vector Store     │
+│  PDF  ──▶  Load  ──▶  Chunk  ──▶  Embed  ──▶  Vector Store      │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐

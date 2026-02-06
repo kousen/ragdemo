@@ -17,6 +17,14 @@ export OPENAI_API_KEY=sk-...
 python -m ragdemo.main
 ```
 
+## Production Track
+
+For persistence with Supabase + pgvector (instead of in-memory storage), use the `supabase-pgvector` branch at the repository root:
+
+```bash
+git switch supabase-pgvector
+```
+
 ## Key Components
 
 | Module               | Purpose                                                                     |
