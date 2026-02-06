@@ -121,7 +121,7 @@ That's RAG in action.
 [SHOW: Spring AI unified diagram]
 https://docs.spring.io/spring-ai/reference/concepts.html#concept-rag
 
-[DEMO: Run ./gradlew bootRun in java/]
+[DEMO: Run ./gradlew bootRun in springai/]
 
 Here's the same thing in Java with Spring AI. Same document, same results.
 

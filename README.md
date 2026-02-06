@@ -26,7 +26,7 @@ All demos follow the same flow: **Load PDF → Chunk → Embed → Store → Ret
 ### Java (Spring AI)
 
 ```bash
-cd java
+cd springai
 export OPENAI_API_KEY=sk-...
 ./gradlew bootRun
 ```
@@ -54,7 +54,7 @@ python -m ragdemo.main
 
 ```
 ragdemo/
-├── java/                            # Spring AI implementation
+├── springai/                        # Spring AI implementation
 │   ├── build.gradle.kts
 │   └── src/main/java/edu/trincoll/ragdemo/
 │       ├── RagDemoApplication.java      # Spring Boot entry point
@@ -114,7 +114,7 @@ The demo includes the "Attention Is All You Need" paper. Try asking:
 ## Adding More Documents
 
 Drop additional PDF files into the `documents/` folder:
-- Java (Spring AI): `java/src/main/resources/documents/`
+- Java (Spring AI): `springai/src/main/resources/documents/`
 - Java (LangChain4j): `langchain4j/src/main/resources/documents/`
 - Python: `python/documents/`
 
@@ -124,7 +124,7 @@ The application will automatically load all PDFs on startup.
 
 ### Java (Spring AI)
 ```bash
-cd java
+cd springai
 ./gradlew test
 ```
 
