@@ -9,13 +9,8 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(21)
     }
-}
-
-// Explicitly set main class to avoid ASM class scanning issue with Java 25
-springBoot {
-    mainClass = "edu.trincoll.ragdemo.RagDemoApplication"
 }
 
 repositories {
