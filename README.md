@@ -1,27 +1,27 @@
 # RAG Demo (Supabase/PgVector Branch)
 
-Parallel implementations of Retrieval-Augmented Generation (RAG) in **Java** (Spring AI) and **Python** (LangChain) for teaching purposes.
+Parallel implementations of Retrieval-Augmented Generation (RAG) in **Java** (Spring AI), **Java** (LangChain4j), and **Python** (LangChain) for teaching purposes.
 
-**This branch uses Supabase (PostgreSQL with pgvector) for persistent vector storage.** Both applications share the same database, demonstrating cross-language interoperability.
+**This branch uses Supabase (PostgreSQL with pgvector) for persistent vector storage.** All three applications share the same database, demonstrating cross-language interoperability.
 
 Both demos follow the same flow: **Load PDF → Chunk → Embed → Store → Retrieve → Generate**
 
 ## Choose Your Implementation
 
-| | Java | Python |
-|---|---|---|
-| **Framework** | Spring AI 1.0.3 | LangChain |
-| **LLM** | OpenAI (gpt-5-mini) | OpenAI (gpt-5-mini) |
-| **Embeddings** | text-embedding-3-small | text-embedding-3-small |
-| **Vector Store** | PgVectorStore (Supabase) | PGVector (Supabase) |
-| **PDF Parser** | PagePdfDocumentReader | PyPDFLoader |
-| **IDE** | IntelliJ IDEA | PyCharm / VS Code |
+| | Java (Spring AI) | Java (LangChain4j) | Python |
+|---|---|---|---|
+| **Framework** | Spring AI 1.0.3 | LangChain4j 1.10.0 | LangChain |
+| **LLM** | OpenAI (gpt-5-mini) | OpenAI (gpt-5-mini) | OpenAI (gpt-5-mini) |
+| **Embeddings** | text-embedding-3-small | text-embedding-3-small | text-embedding-3-small |
+| **Vector Store** | PgVectorStore (Supabase) | PgVectorEmbeddingStore (Supabase) | PGVector (Supabase) |
+| **PDF Parser** | PagePdfDocumentReader | Apache Tika | PyPDFLoader |
+| **IDE** | IntelliJ IDEA | IntelliJ IDEA | PyCharm / VS Code |
 
 ## Prerequisites
 
 - **OpenAI API Key** — Set as environment variable `OPENAI_API_KEY`
 - **Supabase Account** — Free tier at https://supabase.com
-- **Java 21+** (for Java version)
+- **Java 21+** (for Java versions)
 - **Python 3.10+** (for Python version)
 
 ## Supabase Setup
@@ -44,7 +44,7 @@ export SUPABASE_USER=postgres.your-project-ref
 export SUPABASE_PASSWORD=your-database-password
 ```
 
-> **Tip:** Add these to a `.env` file in both `java/` and `python/` directories.
+> **Tip:** Add these to a `.env` file and `source .env` before running any implementation.
 
 ## Quick Start
 
@@ -60,6 +60,14 @@ export SUPABASE_USER=postgres.your-project-ref
 export SUPABASE_PASSWORD=your-database-password
 
 ./gradlew bootRun
+```
+
+### Java (LangChain4j)
+
+```bash
+cd langchain4j
+source .env   # or export env vars manually
+./gradlew run
 ```
 
 ### Python (LangChain)
@@ -82,13 +90,13 @@ python -m ragdemo.main
 
 ## Cross-Language Interoperability
 
-Both applications share the same Supabase vector store. This means:
+All three applications share the same Supabase vector store. This means:
 
-- **Documents loaded by Java are searchable from Python** (and vice versa)
+- **Documents loaded by any implementation are searchable from the others**
 - **Duplicate detection** prevents re-loading the same PDFs
-- Try it: Load documents with Java, then query them from Python!
+- Try it: Load documents with Spring AI, then query them from LangChain4j or Python!
 
-This works because both use the same:
+This works because all three use the same:
 - Embedding model: `text-embedding-3-small` (1536 dimensions)
 - Table name: `vector_store`
 - Metadata schema (source, page, etc.)
@@ -97,9 +105,9 @@ This works because both use the same:
 
 ```
 ragdemo/
-├── java/
+├── java/                            # Spring AI implementation
 │   ├── build.gradle.kts
-│   └── src/main/java/com/kousen/ragdemo/
+│   └── src/main/java/edu/trincoll/ragdemo/
 │       ├── RagDemoApplication.java      # Spring Boot entry point
 │       ├── RagDemoRunner.java           # Interactive CLI
 │       ├── config/RagConfig.java        # VectorStore + ChatClient beans
@@ -107,7 +115,14 @@ ragdemo/
 │           ├── DocumentLoaderService.java   # PDF loading + chunking
 │           └── RagService.java              # Q&A via ChatClient
 │
-└── python/
+├── langchain4j/                     # LangChain4j implementation (no Spring)
+│   ├── build.gradle.kts
+│   └── src/main/java/edu/trincoll/ragdemo/
+│       ├── RagDemo.java                 # Plain Java CLI entry point
+│       ├── RagService.java              # RAG pipeline + PgVectorEmbeddingStore
+│       └── DocumentLoader.java          # PDF loading via Apache Tika
+│
+└── python/                          # Python/LangChain implementation
     └── src/ragdemo/
         ├── main.py              # CLI entry point
         ├── document_loader.py   # PDF loading + chunking
@@ -150,16 +165,23 @@ The demo includes the "Attention Is All You Need" paper. Try asking:
 ## Adding More Documents
 
 Drop additional PDF files into the `documents/` folder:
-- Java: `java/src/main/resources/documents/`
+- Java (Spring AI): `java/src/main/resources/documents/`
+- Java (LangChain4j): `langchain4j/src/main/resources/documents/`
 - Python: `python/documents/`
 
 The application will automatically load all PDFs on startup.
 
 ## Running Tests
 
-### Java
+### Java (Spring AI)
 ```bash
 cd java
+./gradlew test
+```
+
+### Java (LangChain4j)
+```bash
+cd langchain4j
 ./gradlew test
 ```
 
