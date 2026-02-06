@@ -57,21 +57,13 @@ When we embed text, we convert it to a vector—a list of numbers that captures 
 
 Here's the magic: words with similar meanings end up as similar vectors.
 
-Apple and banana are close together—they're both fruits.
-
-Chicago and Detroit are close—they're both Midwest cities.
-
-Dog and cat are close—they're both animals.
+Apple and banana are close together. Chicago and Detroit are close. Dog and cat are close.
 
 [SHOW: Diagram 4b - Query Vector Finding Matches]
 
-Now watch what happens when someone asks a question.
+When someone asks a question, it gets embedded too.
 
-The question gets embedded too—it becomes a vector.
-
-A question about fruits lands near the fruit cluster.
-
-RAG finds the nearest chunks and retrieves them.
+A question about fruits lands near the fruit cluster. RAG finds the nearest chunks and retrieves them.
 
 That's how the system knows which pieces of your documents are relevant to the question.
 
@@ -80,36 +72,24 @@ That's how the system knows which pieces of your documents are relevant to the q
 
 [SHOW: Diagram 2 - Context Window Timeline]
 
-Here's important context.
+RAG was developed when context windows were tiny—4K or 8K tokens. You couldn't fit a single long document in the prompt.
 
-RAG was developed when context windows were tiny—4K or 8K tokens.
+Today, context windows are much larger. So do we still need RAG?
 
-You literally couldn't fit a single long document in the prompt.
-
-Today? Claude has 200K tokens. Gemini 3 Pro has 2 million.
-
-So you might ask: do we still need RAG?
-
-The answer—for now—is yes.
-
-If you've used tools like Claude Code, you know we still hit context limits on real codebases.
-
-And even with huge windows, retrieval is often faster and cheaper than stuffing everything into the prompt.
+For now—yes. We still hit context limits on real codebases, and retrieval is often faster and cheaper than stuffing everything into the prompt.
 
 But this is worth watching. The constraint that created RAG is shrinking.
-
-The technique may evolve—or become unnecessary for some use cases.
 
 
 ===== THE DEMO PROJECT =====
 
-I've built the same RAG application twice—once in Python using LangChain, and once in Java using Spring AI.
+I've built the same RAG application three times—in Python using LangChain, in Java using Spring AI, and in Java using LangChain4j.
 
-Same document, same embedding model, same LLM.
-
-Let's see them in action.
+Same document, same embedding model, same LLM. Three frameworks.
 
 The document I'm using is the famous "Attention Is All You Need" paper that introduced the Transformer architecture.
+
+Let's see them in action.
 
 
 ===== PYTHON DEMO =====
@@ -129,87 +109,65 @@ Now I can see exactly which chunks the system retrieved.
 
 These four pieces of the paper were deemed most relevant to my question.
 
-Remember the embedding diagram? The question "How does self-attention work?" embedded closest to these specific chunks.
+Remember the embedding diagram? The question embedded closest to these specific chunks.
 
 The answer is synthesized from THIS context, not from the model's training data.
 
 That's RAG in action.
 
 
-===== JAVA DEMO =====
+===== JAVA DEMOS =====
 
 [SHOW: Spring AI unified diagram]
 https://docs.spring.io/spring-ai/reference/concepts.html#concept-rag
 
-[DEMO: Run ./gradlew bootRun]
+[DEMO: Run ./gradlew bootRun in java/]
 
-Here's the same thing in Java with Spring AI.
+Here's the same thing in Java with Spring AI. Same document, same results.
 
-Same document, same results.
+Spring AI gives you the full Spring Boot experience—dependency injection, auto-configuration, application properties.
 
-Notice that Spring AI visualizes RAG as a single unified flow, while LangChain splits it into indexing and retrieval phases.
+[DEMO: Run ./gradlew run in langchain4j/]
 
-Different visualizations, same underlying concept.
+Now here's LangChain4j—same language, no Spring Boot.
 
-Why show both implementations?
+This is a plain Java application. No DI container, no annotations—just builders and a public static void main.
 
-Because in enterprise environments, you'll see RAG implemented in many languages.
+Same answers. Very different wiring.
 
-The framework changes, but the flow—load, chunk, embed, store, retrieve, generate—stays the same.
+Why show both? Because Spring AI is great when you're already in the Spring ecosystem. But LangChain4j shows you can do RAG in Java without any framework at all.
+
+The flow—load, chunk, embed, store, retrieve, generate—stays the same regardless.
 
 
 ===== CODE WALKTHROUGH =====
 
-[SHOW: document_loader.py vs DocumentLoaderService.java]
+[SHOW: Side-by-side of all three: document_loader.py, DocumentLoaderService.java, DocumentLoader.java]
 
-Both versions load PDFs and split them into chunks.
+All three versions follow the same six-step flow. The differences are in the wiring.
 
-Python uses LangChain's RecursiveCharacterTextSplitter—it tries to break on paragraph boundaries.
+For chunking, Python uses RecursiveCharacterTextSplitter—it breaks on paragraph boundaries. Spring AI uses TokenTextSplitter—it counts tokens. LangChain4j uses recursive splitting with character overlap.
 
-Java uses TokenTextSplitter—it counts tokens.
-
-Different strategies, same goal: chunks small enough to fit in a prompt, large enough to contain useful context.
-
-[SHOW: vector_store.py vs RagConfig.java]
-
-The vector store is where embeddings live.
-
-Both use in-memory stores for simplicity.
-
-In production, you'd use something like PostgreSQL with pgvector, Pinecone, or Chroma.
+Different strategies, same goal: chunks small enough for a prompt, large enough to be useful.
 
 [SHOW: Diagram 3 - RAG Retrieval Flow]
 
-[SHOW: rag_chain.py vs RagService.java]
+[SHOW: rag_chain.py, RagService.java (Spring AI), RagService.java (LangChain4j)]
 
-Here's where retrieval meets generation.
+For retrieval and generation, Python chains components with LangChain's expression language. Spring AI uses ChatClient with a QuestionAnswerAdvisor. LangChain4j uses AiServices—you define a Java interface and it generates a proxy.
 
-Python uses LangChain's expression language to chain components.
-
-Java uses Spring AI's ChatClient with a QuestionAnswerAdvisor that automatically handles retrieval.
-
-Different APIs, same pattern.
+Three APIs, same pattern.
 
 
 ===== THE PROMPT TEMPLATE =====
 
 One thing students often overlook: the prompt template matters.
 
-Both frameworks provide sensible defaults.
-
-Spring AI's QuestionAnswerAdvisor includes a prompt that says: answer based ONLY on this context. If the answer isn't there, say so.
-
-LangChain's RAG templates work similarly.
+All three frameworks provide sensible defaults that say: answer based ONLY on this context. If the answer isn't there, say so.
 
 This prevents hallucination—the model won't make things up because we've constrained it.
 
-You CAN customize these prompts if you need to.
-
-Want bullet points? Change the prompt.
-
-Want the model to cite its sources? Change the prompt.
-
-But the defaults work well for most use cases—no need to over-engineer it.
+You CAN customize these prompts, but the defaults work well for most use cases.
 
 
 ===== BONUS: PERSISTENT STORAGE =====
@@ -220,17 +178,17 @@ The main branch uses in-memory storage—fine for demos, but your vectors disapp
 
 On a separate branch, I've added Supabase—PostgreSQL with the pgvector extension.
 
-Here's something interesting I discovered: even though both apps connect to the same database, they create different tables.
+Here's what's interesting: all three implementations connect to the same database and share the same table.
 
 [SHOW: Schema diagram]
 
-Spring AI creates one table structure, LangChain creates another.
+I aligned the schemas—same table name, same embedding model, same metadata format.
 
-Same database doesn't mean automatic interoperability.
+Load a document from Spring AI, query it from LangChain4j or Python. It just works.
 
-If you want both implementations to share vectors, you need to align on schema—or use the same framework.
+This took some deliberate configuration. Same database doesn't mean automatic interoperability—you have to align on table structure, embedding dimensions, and metadata format.
 
-This is a real-world gotcha worth knowing about.
+But once you do, cross-language interop is a powerful capability.
 
 
 ===== WHEN TO USE RAG =====
@@ -245,19 +203,9 @@ Use RAG when data is private—it never leaves your infrastructure.
 
 What about fine-tuning?
 
-Fine-tuning is expensive. You need hundreds or thousands of high-quality examples to do it well.
+Fine-tuning is expensive, and when you change the model's weights, it's not clear how that affects other responses.
 
-And here's the tricky part: when you change the model's weights, it's not clear how that affects other responses.
-
-You might improve answers in one area and degrade them somewhere else.
-
-The model's weights are a black box. You can't inspect them.
-
-RAG is transparent—you can see exactly what context the model received.
-
-If an answer is wrong, you can check which chunks were retrieved and debug from there.
-
-Consider fine-tuning only when you need to fundamentally change the model's style or behavior.
+RAG is transparent—you can see exactly what context the model received. If an answer is wrong, check which chunks were retrieved and debug from there.
 
 For most enterprise use cases, RAG is the right starting point.
 
@@ -274,7 +222,7 @@ The question becomes a vector. The nearest chunks become context. The LLM genera
 
 The code is on GitHub—link in the description.
 
-Clone it, swap in your own PDFs, and you've got a working RAG system.
+Clone it, swap in your own PDFs, and you've got a working RAG system in three frameworks.
 
 If you found this useful, subscribe for more AI engineering content.
 
