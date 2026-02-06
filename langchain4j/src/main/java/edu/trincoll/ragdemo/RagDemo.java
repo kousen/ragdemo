@@ -4,10 +4,14 @@ import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -34,17 +38,28 @@ public class RagDemo {
             System.exit(1);
         }
 
-        // Step 1: Load the PDF
+        // Step 1: Load all PDFs from the documents directory
         System.out.println("Loading documents...");
         DocumentLoader loader = new DocumentLoader();
-        Path pdfPath = getResourcePath("documents/sample.pdf");
-        Document document = loader.load(pdfPath);
+        Path docsPath = getResourcePath("documents");
+        List<Path> pdfPaths = listPdfPaths(docsPath);
+        if (pdfPaths.isEmpty()) {
+            System.err.println("Error: No PDF files found in documents/");
+            System.exit(1);
+        }
+        System.out.printf("Found %d PDF file(s)%n", pdfPaths.size());
+
+        List<Document> documents = new ArrayList<>();
+        for (Path pdfPath : pdfPaths) {
+            System.out.printf("  - %s%n", pdfPath.getFileName());
+            documents.add(loader.load(pdfPath));
+        }
 
         // Steps 2-4: Chunk (with overlap) → Embed → Store
         // The EmbeddingStoreIngestor handles all three steps as one pipeline
         System.out.println("Ingesting (splitting with overlap, embedding, storing)...");
         RagService ragService = new RagService(apiKey);
-        ragService.ingest(document);
+        ragService.ingest(documents.toArray(Document[]::new));
         System.out.println("Ready!\n");
 
         // Interactive Q&A loop
@@ -112,7 +127,7 @@ public class RagDemo {
         System.out.println("-----------------------------------\n");
     }
 
-    private static Path getResourcePath(String resource) {
+    static Path getResourcePath(String resource) {
         URL url = RagDemo.class.getClassLoader().getResource(resource);
         if (url == null) {
             throw new RuntimeException("Resource not found: " + resource);
@@ -121,6 +136,18 @@ public class RagDemo {
             return Paths.get(url.toURI());
         } catch (URISyntaxException e) {
             throw new RuntimeException("Invalid resource path: " + resource, e);
+        }
+    }
+
+    static List<Path> listPdfPaths(Path docsPath) {
+        try (var stream = Files.list(docsPath)) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().toLowerCase().endsWith(".pdf"))
+                    .sorted(Comparator.comparing(path -> path.getFileName().toString().toLowerCase()))
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to list PDFs in: " + docsPath, e);
         }
     }
 }

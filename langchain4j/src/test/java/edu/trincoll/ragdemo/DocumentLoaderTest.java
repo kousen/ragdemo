@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,6 +25,8 @@ class DocumentLoaderTest {
 
     private Document document;
     private List<TextSegment> segments;
+    private Document asthmaDocument;
+    private List<TextSegment> asthmaSegments;
 
     @BeforeAll
     void loadDocument() throws URISyntaxException {
@@ -37,6 +40,18 @@ class DocumentLoaderTest {
         segments = DocumentSplitters
                 .recursive(RagService.CHUNK_SIZE, RagService.CHUNK_OVERLAP)
                 .split(document);
+
+        Path asthmaPdfPath = Paths.get(
+                Objects.requireNonNull(
+                        getClass().getClassLoader().getResource(
+                                "documents/asthma_emergency_department_algorithm_-_9.8.23.pdf"
+                        )
+                ).toURI()
+        );
+        asthmaDocument = loader.load(asthmaPdfPath);
+        asthmaSegments = DocumentSplitters
+                .recursive(RagService.CHUNK_SIZE, RagService.CHUNK_OVERLAP)
+                .split(asthmaDocument);
     }
 
     @Test
@@ -49,6 +64,18 @@ class DocumentLoaderTest {
     void shouldHaveSourceMetadata() {
         assertThat(document.metadata().getString("source"))
                 .isEqualTo("sample.pdf");
+    }
+
+    @Test
+    void shouldLoadAsthmaPdfWithContent() {
+        assertThat(asthmaDocument.text()).isNotBlank();
+        assertThat(asthmaDocument.text().length()).isGreaterThan(1000);
+    }
+
+    @Test
+    void shouldHaveAsthmaSourceMetadata() {
+        assertThat(asthmaDocument.metadata().getString("source"))
+                .isEqualTo("asthma_emergency_department_algorithm_-_9.8.23.pdf");
     }
 
     @Test
@@ -73,6 +100,18 @@ class DocumentLoaderTest {
                 });
         assertThat(hasRelevantContent)
                 .as("PDF chunks should contain transformer/attention content")
+                .isTrue();
+    }
+
+    @Test
+    void asthmaChunksShouldContainClinicalPathwayContent() {
+        boolean hasRelevantContent = asthmaSegments.stream()
+                .anyMatch(segment -> {
+                    String text = segment.text().toLowerCase();
+                    return text.contains("mpis") || text.contains("albuterol") || text.contains("ipratropium");
+                });
+        assertThat(hasRelevantContent)
+                .as("Asthma PDF chunks should contain pathway terms like MPIS/albuterol/ipratropium")
                 .isTrue();
     }
 
