@@ -1,0 +1,40 @@
+flowchart TB
+    subgraph docs["Document Store (any size)"]
+        D1["Chunk 1"]
+        D2["Chunk 2"]
+        D3["Chunk 3"]
+        D4["Chunk 4"]
+        D5["Chunk 5"]
+        D6["...hundreds more..."]
+    end
+
+    Q["User Question"] --> E["Embed Query"]
+    E --> S["Similarity Search"]
+    S --> docs
+
+    D2 -.->|"relevant"| R
+    D4 -.->|"relevant"| R
+
+    subgraph R["Retrieved Context"]
+        RC1["Chunk 2"]
+        RC2["Chunk 4"]
+    end
+
+    subgraph window["Context Window ✓"]
+        P["Question + Relevant Chunks<br/>━━━━━━━━━━━━━━━━<br/>Fits!"]
+    end
+
+    R --> window
+    Q --> window
+    window --> LLM["LLM"] --> A["Answer"]
+
+    style docs fill:#e3f2fd,stroke:#1976d2,color:#000
+    style D2 fill:#c8e6c9,stroke:#388e3c,color:#000
+    style D4 fill:#c8e6c9,stroke:#388e3c,color:#000
+    style R fill:#a5d6a7,stroke:#388e3c,color:#000
+    style window fill:#81c784,stroke:#2e7d32,color:#000
+    style Q fill:#bbdefb,stroke:#1565c0,color:#000
+    style E fill:#90caf9,stroke:#1565c0,color:#000
+    style S fill:#90caf9,stroke:#1565c0,color:#000
+    style LLM fill:#ffcc80,stroke:#ef6c00,color:#000
+    style A fill:#a5d6a7,stroke:#388e3c,color:#000

@@ -1,0 +1,23 @@
+flowchart TB
+    U["Incoming Question"] --> C{"Cache Hit?"}
+    C -->|Yes| H["Reuse cached context/result<br/>Lower cost, faster response"]
+    C -->|No| M["Cache miss"]
+
+    M --> V{"Prompt/docs changed?"}
+    V -->|Yes| R["Retrieve fresh chunks<br/>from vector store"]
+    V -->|No| R
+
+    R --> A["Answer with current context"]
+    H --> A
+
+    D["Documents updated over time"] -.-> R
+    D -.-> S["Cached entries can become stale"]
+    S -.-> C
+
+    style C fill:#bbdefb,stroke:#1565c0,color:#000
+    style H fill:#c8e6c9,stroke:#2e7d32,color:#000
+    style M fill:#ffcdd2,stroke:#c62828,color:#000
+    style V fill:#bbdefb,stroke:#1565c0,color:#000
+    style R fill:#dcedc8,stroke:#558b2f,color:#000
+    style D fill:#ffe0b2,stroke:#ef6c00,color:#000
+    style S fill:#ffecb3,stroke:#f9a825,color:#000

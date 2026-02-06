@@ -19,7 +19,7 @@ RAG stands for Retrieval-Augmented Generation.
 You retrieve relevant pieces at query time
 and include them in the prompt.
 
-[SHOW: Diagram 1 - Documents Don't Fit]
+[SHOW: Diagram 1 - Documents Don't Fit | diagrams/exports/svg/01-problem-documents-dont-fit.svg]
 
 Here's the problem RAG solves.
 
@@ -58,7 +58,7 @@ That's the key insight.
 
 ===== WHAT ARE EMBEDDINGS? =====
 
-[SHOW: Diagram 4a - Embedding Space Clustering]
+[SHOW: Diagram 4a - Embedding Space Clustering | use ASCII in diagrams/context-window-diagrams.md]
 
 Now let's make embeddings concrete.
 
@@ -72,7 +72,7 @@ Apple and banana are close.
 Chicago and Detroit are close.
 Dog and cat are close.
 
-[SHOW: Diagram 4b - Query Vector Finding Matches]
+[SHOW: Diagram 4b - Query Vector Finding Matches | use ASCII in diagrams/context-window-diagrams.md]
 
 When someone asks a question, it gets embedded too.
 
@@ -84,7 +84,7 @@ That's how the system finds the most relevant pieces of your documents.
 
 ===== WHY DOES RAG EXIST? =====
 
-[SHOW: Diagram 2 - Context Window Timeline]
+[SHOW: Diagram 2 - Context Window Timeline | diagrams/exports/svg/02-context-window-evolution.svg]
 
 RAG started when context windows were tiny.
 Think 4K or 8K tokens.
@@ -97,10 +97,14 @@ That is impressive.
 But the question shifts from "can it fit?"
 to "should we send all of it every time?"
 
+[SHOW: Diagram 4 - Long Context vs RAG | diagrams/exports/svg/04-long-context-vs-rag.svg]
+
 Caching can lower long-context cost.
 But it does not eliminate cost.
 And cache hits drop when prompts,
 users, or documents vary.
+
+[SHOW: Diagram 5 - Caching vs Fresh Retrieval | diagrams/exports/svg/05-caching-vs-fresh-retrieval.svg]
 
 Your data also changes over time.
 Cached context can go stale.
@@ -215,7 +219,7 @@ Different strategies, same goal:
 chunks small enough for prompts,
 large enough to stay useful.
 
-[SHOW: Diagram 3 - RAG Retrieval Flow]
+[SHOW: Diagram 3 - RAG Retrieval Flow | diagrams/exports/svg/03-rag-solution.svg]
 
 [SHOW: rag_chain.py, RagService.java (Spring AI), RagService.java (LangChain4j)]
 
@@ -261,7 +265,7 @@ Key point:
 all three implementations connect to the same database
 and share the same table.
 
-[SHOW: Schema diagram]
+[SHOW: Diagram 6 - Shared pgvector architecture | diagrams/exports/svg/06-persistent-rag-three-stacks.svg]
 
 I aligned the schemas:
 same table name,
