@@ -13,6 +13,30 @@ about content it has never seen?
 That's where RAG comes in.
 
 
+===== DIAGRAM CUE MAP =====
+
+Diagram 1: Documents Don't Fit
+File: diagrams/exports/svg/01-problem-documents-dont-fit.svg
+
+Diagram 2: Context Window Timeline
+File: diagrams/exports/svg/02-context-window-evolution.svg
+
+Diagram 3: RAG Retrieval Flow
+File: diagrams/exports/svg/03-rag-solution.svg
+
+Diagram 4: Long Context vs RAG
+File: diagrams/exports/svg/04-long-context-vs-rag.svg
+
+Diagram 5: Caching vs Fresh Retrieval
+File: diagrams/exports/svg/05-caching-vs-fresh-retrieval.svg
+
+Diagram 6: Shared pgvector architecture
+File: diagrams/exports/svg/06-persistent-rag-three-stacks.svg
+
+Diagram 4a and 4b: Embedding visuals (ASCII)
+File: diagrams/context-window-diagrams.md
+
+
 ===== WHAT IS RAG? =====
 
 RAG stands for Retrieval-Augmented Generation.
