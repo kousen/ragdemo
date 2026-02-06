@@ -4,7 +4,7 @@ Parallel implementations of Retrieval-Augmented Generation (RAG) in **Java** (Sp
 
 **This branch uses Supabase (PostgreSQL with pgvector) for persistent vector storage.** All three applications share the same database, demonstrating cross-language interoperability.
 
-Both demos follow the same flow: **Load PDF → Chunk → Embed → Store → Retrieve → Generate**
+All demos follow the same flow: **Load PDF → Chunk → Embed → Store → Retrieve → Generate**
 
 ## Choose Your Implementation
 
@@ -34,7 +34,7 @@ Both demos follow the same flow: **Load PDF → Chunk → Embed → Store → Re
    - Go to **Settings** → **Database**
    - Copy the connection details from "Connection string" → "URI"
 
-Set these environment variables (both apps use the same credentials):
+Set these environment variables (all three apps use the same credentials):
 
 ```bash
 export SUPABASE_HOST=aws-0-us-east-1.pooler.supabase.com
@@ -51,7 +51,7 @@ export SUPABASE_PASSWORD=your-database-password
 ### Java (Spring AI)
 
 ```bash
-cd java
+cd springai
 # Set environment variables (or use .env file)
 export OPENAI_API_KEY=sk-...
 export SUPABASE_HOST=aws-0-us-east-1.pooler.supabase.com
@@ -105,7 +105,7 @@ This works because all three use the same:
 
 ```
 ragdemo/
-├── java/                            # Spring AI implementation
+├── springai/                        # Spring AI implementation
 │   ├── build.gradle.kts
 │   └── src/main/java/edu/trincoll/ragdemo/
 │       ├── RagDemoApplication.java      # Spring Boot entry point
@@ -165,7 +165,7 @@ The demo includes the "Attention Is All You Need" paper. Try asking:
 ## Adding More Documents
 
 Drop additional PDF files into the `documents/` folder:
-- Java (Spring AI): `java/src/main/resources/documents/`
+- Java (Spring AI): `springai/src/main/resources/documents/`
 - Java (LangChain4j): `langchain4j/src/main/resources/documents/`
 - Python: `python/documents/`
 
@@ -175,7 +175,7 @@ The application will automatically load all PDFs on startup.
 
 ### Java (Spring AI)
 ```bash
-cd java
+cd springai
 ./gradlew test
 ```
 
