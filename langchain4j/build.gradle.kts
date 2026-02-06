@@ -20,7 +20,7 @@ repositories {
     mavenCentral()
 }
 
-val langchain4jVersion = "1.10.0"
+val langchain4jVersion = "1.11.0"
 
 dependencies {
     // LangChain4j core
@@ -34,12 +34,12 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-document-parser-apache-tika:1.10.0-beta18")
 
     // SLF4J simple logger (LC4j uses SLF4J internally)
-    implementation("org.slf4j:slf4j-simple:2.0.16")
+    implementation("org.slf4j:slf4j-simple:2.0.17")
 
     // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.27.3")
+    testImplementation("org.assertj:assertj-core:3.27.7")
 }
 
 tasks.withType<Test> {

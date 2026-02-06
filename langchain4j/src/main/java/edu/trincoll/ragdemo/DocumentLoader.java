@@ -1,11 +1,10 @@
 package edu.trincoll.ragdemo;
 
 import dev.langchain4j.data.document.Document;
+import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
 import dev.langchain4j.data.document.parser.apache.tika.ApacheTikaDocumentParser;
 
 import java.nio.file.Path;
-
-import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
 
 /**
  * Loads PDF documents for ingestion into the RAG pipeline.
@@ -25,7 +24,8 @@ public class DocumentLoader {
      * @return a Document with text content and source metadata
      */
     public Document load(Path pdfPath) {
-        Document document = loadDocument(pdfPath, new ApacheTikaDocumentParser());
+        Document document = FileSystemDocumentLoader.loadDocument(
+                pdfPath, new ApacheTikaDocumentParser());
         document.metadata().put("source", pdfPath.getFileName().toString());
         return document;
     }

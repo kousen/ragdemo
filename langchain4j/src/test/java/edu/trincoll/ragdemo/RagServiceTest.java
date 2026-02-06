@@ -9,6 +9,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +29,9 @@ class RagServiceTest {
         // Load document
         DocumentLoader loader = new DocumentLoader();
         Path pdfPath = Paths.get(
-                getClass().getClassLoader().getResource("documents/sample.pdf").toURI()
+                Objects.requireNonNull(getClass().getClassLoader()
+                                .getResource("documents/sample.pdf"))
+                        .toURI()
         );
         Document document = loader.load(pdfPath);
 
@@ -83,7 +86,7 @@ class RagServiceTest {
         RagService.DebugResult result = ragService.askWithContext("Explain the encoder architecture");
 
         assertThat(result.matches()).isNotEmpty();
-        assertThat(result.matches().get(0).embedded().metadata().getString("source"))
+        assertThat(result.matches().getFirst().embedded().metadata().getString("source"))
                 .isEqualTo("sample.pdf");
     }
 
@@ -93,7 +96,7 @@ class RagServiceTest {
 
         assertThat(result.matches()).isNotEmpty();
         // EmbeddingMatch always provides a score
-        assertThat(result.matches().get(0).score())
+        assertThat(result.matches().getFirst().score())
                 .as("Retrieved documents should have similarity scores")
                 .isGreaterThan(0.0);
     }
