@@ -20,6 +20,7 @@ import dev.langchain4j.store.embedding.pgvector.DefaultMetadataStorageConfig;
 import dev.langchain4j.store.embedding.pgvector.MetadataStorageMode;
 import dev.langchain4j.store.embedding.pgvector.PgVectorEmbeddingStore;
 
+import java.util.Collections;
 import java.util.List;
 
 import static dev.langchain4j.store.embedding.filter.MetadataFilterBuilder.metadataKey;
@@ -96,8 +97,10 @@ public class RagService {
                 .table("vector_store")
                 .dimension(1536)
                 .createTable(true)
-                .useIndex(true)
+                .dropTableFirst(true)  // Drop and recreate to fix schema mismatch
+                .useIndex(false)  // Disable index creation for Supabase (memory limits)
                 .metadataStorageConfig(DefaultMetadataStorageConfig.builder()
+                        .columnDefinitions(Collections.singletonList("metadata JSONB"))
                         .storageMode(MetadataStorageMode.COMBINED_JSONB)
                         .build())
                 .build();
