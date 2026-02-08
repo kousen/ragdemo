@@ -14,6 +14,18 @@ export OPENAI_API_KEY=sk-...
 ./gradlew bootRun
 ```
 
+Or, if you keep credentials in a `.env` file (recommended for this repo layout):
+
+```bash
+./run.sh
+```
+
+On Windows:
+
+```bat
+run.bat
+```
+
 ## Key Components
 
 | Class                   | Purpose                                                                      |
