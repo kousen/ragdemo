@@ -27,7 +27,7 @@ block-beta
         D["📄 Doc 4<br/>20K tokens"]
     end
 
-    arrow1<["❌ Won't fit!"]>(right)
+    arrow1<["❌ Ne convient pas !"]>(right)
 
     block:window:1
         columns 1
